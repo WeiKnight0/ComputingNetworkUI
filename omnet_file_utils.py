@@ -1,4 +1,5 @@
 import os
+from allTypeItem import *
 
 # 写入 network.ned 的具体内容（使用传入的文件对象）
 def write_network_ned(f, typeNum=None, nodeList=None, channelList=None):
@@ -54,3 +55,46 @@ def write_connections(f, nodeList, channelList):
         bandwidth = channel.bandwidth if channel.bandwidth != 0 else 100
         f.write("\t\t%s.ethg++ <--> ThruputMeteringChannel{bandwidth=%dMbps } <--> %s.ethg++;\n"
                 %(start_name, bandwidth, end_name))
+
+
+def write_xml(file, nodeList, channelList):
+    # 写入 XML 头部
+    file.write('<?xml version="1.0"?>\n')
+    file.write('<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">\n\n')
+
+    # 写入主干区域（Area 0.0.0.0）
+    file.write('  <!-- Area 0.0.0.0: 主干区域，包含所有节点和连接的网段 -->\n')
+    file.write('  <Area id="0.0.0.0">\n')
+
+    # 写入连接的地址范围
+    for channel in channelList:
+        start_name = channel.start_item.name
+        end_name = channel.end_item.name
+        file.write(f'    <AddressRange address="{start_name}>{end_name}" mask="255.255.255.0" />\n')
+        file.write(f'    <AddressRange address="{end_name}>{start_name}" mask="255.255.255.0" />\n')
+
+    # 写入节点的地址范围
+    for node in nodeList:
+        if node.nodetype in ["UserNode", "ComputingNode", "DecisionRouter"]:
+            file.write(f'    <AddressRange address="{node.name}" mask="255.255.255.0" />\n')
+
+    file.write('  </Area>\n\n')
+
+    # 写入路由器配置
+    for node in nodeList:
+        if node.nodetype in ["Router", "UserRouter", "ComputingRouter"]:
+            file.write(f'  <Router name="{node.name}" RFC1583Compatible="true">\n')
+
+            # 为每个接口生成配置
+            for i, channel in enumerate(node.channelList):
+                interface_type = "PointToPointInterface"  # 默认点对点接口
+                # 如果是连接用户或计算节点的接口，可能是广播接口
+                if channel.another_point_of_channel(node).nodetype in ["UserNode", "ComputingNode"]:
+                    interface_type = "BroadcastInterface"
+
+                file.write(f'    <{interface_type} ifName="eth{i}" area="0.0.0.0" interfaceOutputCost="1" />\n')
+
+            file.write('  </Router>\n\n')
+
+    # 关闭根元素
+    file.write('</OSPFASConfig>\n')

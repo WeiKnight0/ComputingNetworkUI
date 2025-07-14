@@ -18,6 +18,7 @@ import omnet_file_utils
 
 uiLoader = QUiLoader()
 
+
 class UserWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -36,7 +37,7 @@ class UserWindow(QMainWindow):
         self.start_item = None  # 用于记录连线的起点
 
         # 用字典记录各类节点的数量
-        self.typeNum = {"UserNode": 0, 
+        self.typeNumDict = {"UserNode": 0,
                     "ComputingNode": 0, 
                     "UserRouter": 0, 
                     "ComputingRouter": 0, 
@@ -83,14 +84,14 @@ class UserWindow(QMainWindow):
         add_action = QAction("添加", self)
         add_action.triggered.connect(lambda: self.add_node(item))
         menu.addAction(add_action)
-        menu.exec_(self.ui.listWidget.mapToGlobal(pos))
+        menu.exec(self.ui.listWidget.mapToGlobal(pos))
         
     def add_node(self, list_item):
         # 根据ListWidget的item生成节点
         icon_path = f"icon/{list_item.text().lower().replace(' ', '_')}.png"
         nodetype = self.getNodeType(list_item.text())
-        node = self.createNewItemByType(nodetype, list_item.text(), self.typeNum[nodetype], icon_path)
-        self.typeNum[nodetype] += 1
+        node = self.createNewItemByType(nodetype, list_item.text(), self.typeNumDict[nodetype], icon_path)
+        self.typeNumDict[nodetype] += 1
         self.scene.addItem(node)
         
         # 将节点放置在视图中心
@@ -189,7 +190,7 @@ class UserWindow(QMainWindow):
         if node in self.nodes:
             nodeType = node.nodetype
             nodeIndex = node.index
-            self.typeNum[nodeType] -= 1
+            self.typeNumDict[nodeType] -= 1
             self.nodes.remove(node)
             self.update_index(nodeType, nodeIndex)
             
@@ -229,7 +230,7 @@ class UserWindow(QMainWindow):
             # 3. 处理 network.ned 文件
             ned_path = os.path.join(target_dir, "network.ned")
             with open(ned_path, "w", encoding="utf-8") as f_ned:
-                omnet_file_utils.write_network_ned(f_ned, self.typeNum, self.nodes, self.channels)
+                omnet_file_utils.write_network_ned(f_ned, self.typeNumDict, self.nodes, self.channels)
 
             # 4. 处理 omnetpp.ini 文件
             ini_path = os.path.join(target_dir, "omnetpp.ini")
