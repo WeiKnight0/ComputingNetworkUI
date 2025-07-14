@@ -22,7 +22,7 @@ class NodeItem(QGraphicsItem, QObject):
     # 记录 pickle.load 期间创建的实例
     # _pickle_instances = weakref.WeakSet()
 
-    def __init__(self, name, nodetype, index, icon_path, firstCreate=True, parent=None):
+    def __init__(self, name:str, nodetype, index, icon_path, firstCreate=True, parent=None):
         """
         节点项的构造函数。
 
@@ -120,8 +120,8 @@ class NodeItem(QGraphicsItem, QObject):
         # 定义节点名称到类型的映射字典
         typeDict = {"用户节点": "UserNode",
                     "算力节点": "ComputingNode",
-                    "用户网关": "UserRouter",
-                    "算力网关": "computingRouter",
+                    "用户网关": "UserGateway",
+                    "算力网关": "ComputingGateway",
                     "调度决策网关": "DecisionRouter",
                     "路由器": "Router"}
         return typeDict.get(nodeName, None)
@@ -138,12 +138,12 @@ class NodeItem(QGraphicsItem, QObject):
             print(f"属性为:{key}")
             # 跳过不可序列化的 QObject 和 SignalInstance 类型的属性
             if isinstance(value, QObject) or isinstance(value, SignalInstance):
-                print(f"🚨 移除不可序列化的 QObject: {key}")
+                # 移除不可序列化的类
                 continue
 
             # 跳过 QPixmap 类型的属性，因为它不可直接序列化
-            elif isinstance(value, QPixmap):
-                print(f"🖼️ 处理 QPixmap: {key}")
+            elif isinstance(value, QPixmap) or isinstance(value, QPen):# QPen是我添加的，添加之后报错了
+                # 处理 QPixmap 或 QPen
                 continue
 
             print("value语句赋值正确")
@@ -172,7 +172,7 @@ class NodeItem(QGraphicsItem, QObject):
         """
         print(f"进入 __setstate__，此时id为{id(self)}，类型为{type(self)}")
         # 打印调用栈，方便调试
-        traceback.print_stack()
+        # traceback.print_stack()
         for key, value in state.items():
             # 跳过类属性，避免覆盖类的信号
             if key in ("delete_self", "destroyed"):
@@ -199,6 +199,7 @@ class NodeItem(QGraphicsItem, QObject):
         print(f"完成赋值时id为{id(self)}")
         # 根据节点类型获取节点名称
         name = self.type_to_name(self.nodetype)
+        print('此时的name和nodetype：',name,self.nodetype)
         # 调用 __init__ 方法进行非首次创建的初始化
         self.__init__(name, self.index, self.icon_path, firstCreate=False)
 
@@ -212,8 +213,10 @@ class NodeItem(QGraphicsItem, QObject):
         # 定义节点类型到名称的映射字典
         nameDict = {"UserNode": "用户节点",
                     "ComputingNode": "算力节点",
+                    "UserGateway": "用户网关",
                     "UserRouter": "用户网关",
-                    "computingRouter": "算力网关",
+                    "ComputingRouter": "算力网关",
+                    "ComputingGateway": "算力网关",
                     "DecisionRouter": "调度决策网关",
                     "Router": "路由器"}
         return nameDict.get(nodetype, None)

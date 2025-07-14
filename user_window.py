@@ -12,7 +12,7 @@ from PySide6.QtGui import QPixmap, QPen, QColor, QTransform, QAction
 
 from channel import Channel, ChannelInfo
 from nodeItem import NodeItem
-from allTypeItem import (UserNode, UserRouter, ComputingNode, ComputingRouter, 
+from allTypeItem import (UserNode, UserGateway, ComputingNode, ComputingGateway, 
                          Router, DecisionRouter)
 import omnet_file_utils
 
@@ -39,8 +39,8 @@ class UserWindow(QMainWindow):
         # 用字典记录各类节点的数量
         self.typeNumDict = {"UserNode": 0,
                     "ComputingNode": 0, 
-                    "UserRouter": 0, 
-                    "ComputingRouter": 0, 
+                    "UserGateway": 0, 
+                    "ComputingGateway": 0, 
                     "DecisionRouter": 0, 
                     "Router": 0}
         
@@ -105,8 +105,8 @@ class UserWindow(QMainWindow):
     def getNodeType(self, nodeName):
         typeDict = {"用户节点": "UserNode", 
                     "算力节点": "ComputingNode", 
-                    "用户网关": "UserRouter", 
-                    "算力网关": "ComputingRouter", 
+                    "用户网关": "UserGateway", 
+                    "算力网关": "ComputingGateway", 
                     "调度决策网关": "DecisionRouter", 
                     "路由器": "Router"}
         return typeDict.get(nodeName, None)
@@ -117,10 +117,10 @@ class UserWindow(QMainWindow):
             return UserNode(name, index, icon_path)
         elif nodetype == "ComputingNode":
             return ComputingNode(name, index, icon_path)
-        elif nodetype == "UserRouter":
-            return UserRouter(name, index, icon_path)
-        elif nodetype == "ComputingRouter":
-            return ComputingRouter(name, index, icon_path)
+        elif nodetype == "UserGateway":
+            return UserGateway(name, index, icon_path)
+        elif nodetype == "ComputingGateway":
+            return ComputingGateway(name, index, icon_path)
         elif nodetype == "DecisionRouter":
             return DecisionRouter(name, index, icon_path)
         elif nodetype == "Router":
@@ -140,18 +140,16 @@ class UserWindow(QMainWindow):
         return True
     
     def mouse_press_event(self, event):
-        #print("mouse_press_event函数启动")
-        #print(f"is_alt_pressed的值为：", self.is_alt_pressed)
         if event.modifiers() == Qt.AltModifier:  # 仅在 Alt 键按下时处理
             scene_pos = self.ui.graphicsView.mapToScene(event.pos())
             item = self.scene.itemAt(scene_pos, self.ui.graphicsView.transform())
             if isinstance(item, NodeItem) and not self.start_item:  # 仅首次单击记录起点
                 self.start_item = item
-                #print(f"起点: {self.start_item.name}")
                 
     def mouse_release_event(self, event):
-        #print("mouse_release_event函数启动")
-        # 按住 Alt 键选择终点并绘制连线
+        """
+        按住 Alt 键选择终点并绘制连线
+        """
         if event.modifiers() == Qt.AltModifier and self.start_item:  # 仅在 Alt 键按下且有起点时处理
             scene_pos = self.ui.graphicsView.mapToScene(event.pos())
             item = self.scene.itemAt(scene_pos, self.ui.graphicsView.transform())
@@ -217,7 +215,8 @@ class UserWindow(QMainWindow):
         folder_path = QFileDialog.getExistingDirectory(
             None, "选择 OMNeT++ Workspace 文件夹", ""
         )
-
+        print([node.name for node in self.nodes])
+        print([len(node.channelList) for node in self.nodes])
         if not folder_path:
             QMessageBox.warning(None, "警告", "未选择任何文件夹，提交取消。")
             return
@@ -278,18 +277,20 @@ class UserWindow(QMainWindow):
     
     def save_to_file(self, filename="network_data.pickle"):
         #保存当前的节点和连线数据到文件
-        #try:
-        with open(filename, "wb") as file:
-            nodes_data = [node for node in self.nodes]
-            channels_data = [ChannelInfo(channel) for channel in self.channels]
-            data = {
-                "nodes": nodes_data,
-                "channels": channels_data
-            }
-            pickle.dump(data, file)
-            print(f"数据已成功保存到 {filename}")
-        #except Exception as e:
-            #print(f"保存失败: {e}")
+        try:
+            with open(filename, "wb") as file:
+                nodes_data = [node for node in self.nodes]
+                channels_data = [ChannelInfo(channel) for channel in self.channels]
+                data = {
+                    "nodes": nodes_data,
+                    "channels": channels_data
+                }
+                print('!!!!!!!!')
+                print(data)
+                pickle.dump(data, file)
+                print(f"数据已成功保存到 {filename}")
+        except Exception as e:
+            print(f"保存失败: {e}")
 
     def load_from_file(self, filename="network_data.pickle"):
         """从文件中加载节点和连线数据"""
@@ -337,13 +338,14 @@ class UserWindow(QMainWindow):
                 
                 print(f"数据已成功从 {filename} 加载")
         except Exception as e:
-            print(f"加载失败: {e}")
+            raise(e)
+            # print(f"加载失败: {e}")
     
     def type_to_name(self, nodetype):
         nameDict = {"UserNode": "用户节点", 
                     "ComputingNode": "算力节点", 
-                    "UserRouter": "用户网关", 
-                    "computingRouter": "算力网关", 
+                    "UserGateway": "用户网关", 
+                    "ComputingGateway": "算力网关",
                     "DecisionRouter": "调度决策网关", 
                     "Router": "路由器"}
         return nameDict.get(nodetype, None)

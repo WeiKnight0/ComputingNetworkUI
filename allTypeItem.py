@@ -4,8 +4,8 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt, QObject, SignalInstance
 from nodeItem import NodeItem
 from set_userNode_widget import SetUserNodeWidget
-from set_userRouter_widget import SetUserRouterWidget
-from set_computingRouter_widget import SetComputingRouterWidget
+from set_userGateway_widget import SetUserGatewayWidget
+from set_computingGateway_widget import SetComputingGatewayWidget
 from set_IPConfig_widget import IPConfigWidget
 
 
@@ -119,17 +119,17 @@ class Router(NodeItem):
 
 
 # 定义用户网关类，继承自Router
-class UserRouter(Router):
+class UserGateway(Router):
     def __init__(self, name, index, icon_path, firstCreate=True, parent=None):
         # 调用父类的构造函数，初始化节点的基本属性
-        super().__init__(name, index, icon_path, firstCreate, "UserRouter", parent)
+        super().__init__(name, index, icon_path, firstCreate, "UserGateway", parent)
 
 
 # 定义算力网关类，继承自Router
-class ComputingRouter(Router):
+class ComputingGateway(Router):
     def __init__(self, name, index, icon_path, firstCreate=True, parent=None):
         # 调用父类的构造函数，初始化节点的基本属性
-        super().__init__(name, index, icon_path, firstCreate, "ComputingRouter", parent)
+        super().__init__(name, index, icon_path, firstCreate, "ComputingGateway", parent)
 
 
 # 定义调度决策网关类，继承自NodeItem
@@ -145,4 +145,7 @@ class DecisionRouter(NodeItem):
 
     # 调度决策网关特有的方法
     def custom_method(self):
-        print("This is a UserRouter.")
+        print("This is a UserGateway.")
+
+# UserRouter = UserGateway
+# ComputingRouter = ComputingGateway
