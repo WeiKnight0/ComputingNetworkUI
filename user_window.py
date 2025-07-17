@@ -12,12 +12,14 @@ from PySide6.QtGui import QPixmap, QPen, QColor, QTransform, QAction
 
 from channel import Channel, ChannelInfo
 from nodeItem import NodeItem
-from allTypeItem import (UserNode, UserGateway, ComputingNode, ComputingGateway, 
-                         Router, DecisionRouter)
-import omnet_file_utils
+from allTypeItem import (UserNode, UserGateway, ComputeNode, ComputingGateway, 
+                         Router, ComputeScheduleNode)
+from omnet_file_utils import NEDWriter, INIWriter
 
 uiLoader = QUiLoader()
 
+global_nodes = []
+global_channels = []
 
 class UserWindow(QMainWindow):
     def __init__(self):
@@ -38,10 +40,10 @@ class UserWindow(QMainWindow):
 
         # 用字典记录各类节点的数量
         self.typeNumDict = {"UserNode": 0,
-                    "ComputingNode": 0, 
+                    "ComputeNode": 0, 
                     "UserGateway": 0, 
                     "ComputingGateway": 0, 
-                    "DecisionRouter": 0, 
+                    "ComputeScheduleNode": 0,
                     "Router": 0}
         
         # 安装事件过滤器
@@ -104,10 +106,10 @@ class UserWindow(QMainWindow):
 
     def getNodeType(self, nodeName):
         typeDict = {"用户节点": "UserNode", 
-                    "算力节点": "ComputingNode", 
+                    "算力节点": "ComputeNode", 
                     "用户网关": "UserGateway", 
                     "算力网关": "ComputingGateway", 
-                    "调度决策网关": "DecisionRouter", 
+                    "调度决策网关": "ComputeScheduleNode",
                     "路由器": "Router"}
         return typeDict.get(nodeName, None)
 
@@ -115,14 +117,14 @@ class UserWindow(QMainWindow):
     def createNewItemByType(self, nodetype, name, index, icon_path):
         if nodetype == "UserNode":
             return UserNode(name, index, icon_path)
-        elif nodetype == "ComputingNode":
-            return ComputingNode(name, index, icon_path)
+        elif nodetype == "ComputeNode":
+            return ComputeNode(name, index, icon_path)
         elif nodetype == "UserGateway":
             return UserGateway(name, index, icon_path)
         elif nodetype == "ComputingGateway":
             return ComputingGateway(name, index, icon_path)
-        elif nodetype == "DecisionRouter":
-            return DecisionRouter(name, index, icon_path)
+        elif nodetype == "ComputeScheduleNode":
+            return ComputeScheduleNode(name, index, icon_path)
         elif nodetype == "Router":
             return Router(name, index, icon_path)
         else:
@@ -172,6 +174,7 @@ class UserWindow(QMainWindow):
 
                 # 连接信号
                 channel.delete_self.connect(self.remove_channel)
+                print('线正确')
             
             #self.start_item = None  # 重置连线起点
 
@@ -215,8 +218,8 @@ class UserWindow(QMainWindow):
         folder_path = QFileDialog.getExistingDirectory(
             None, "选择 OMNeT++ Workspace 文件夹", ""
         )
-        print([node.name for node in self.nodes])
-        print([len(node.channelList) for node in self.nodes])
+        # print([node.name for node in self.nodes])
+        # print([len(node.channelList) for node in self.nodes])
         if not folder_path:
             QMessageBox.warning(None, "警告", "未选择任何文件夹，提交取消。")
             return
@@ -228,26 +231,26 @@ class UserWindow(QMainWindow):
 
             # 3. 处理 network.ned 文件
             ned_path = os.path.join(target_dir, "network.ned")
-            with open(ned_path, "w", encoding="utf-8") as f_ned:
-                omnet_file_utils.write_network_ned(f_ned, self.typeNumDict, self.nodes, self.channels)
+            ned_writer = NEDWriter(ned_path, nodeList=self.nodes, channelList=self.channels)
+            ned_writer.write()
 
             # 4. 处理 omnetpp.ini 文件
             ini_path = os.path.join(target_dir, "omnetpp.ini")
-            with open(ini_path, "w", encoding="utf-8") as f_ini:
-                omnet_file_utils.write_omnetpp_ini(f_ini, self.nodes, self.channels)
+            ini_writer = INIWriter(ini_path, nodeList=self.nodes, channelList=self.channels)
+            ini_writer.write()
 
             QMessageBox.information(None, "成功", "测试数据已成功写入 network.ned 和 omnetpp.ini")
             # 缺少xml文件的编写和终端运行的脚本的编写和运行
 
         except Exception as e:
             QMessageBox.critical(None, "错误", f"提交过程中出现错误：{str(e)}")
+            raise(e)
     
     # 清除所有节点
     def on_clear(self):
         for node in self.nodes[::-1]:
             node.delete_node()
-        
-        print(f"self.nodes列表为:{self.nodes}")
+        # print(f"self.nodes列表为:{self.nodes}")
 
     def on_save(self):
         # 打开文件对话框，让用户选择保存路径和文件名
@@ -291,6 +294,7 @@ class UserWindow(QMainWindow):
                 print(f"数据已成功保存到 {filename}")
         except Exception as e:
             print(f"保存失败: {e}")
+            raise(e)
 
     def load_from_file(self, filename="network_data.pickle"):
         """从文件中加载节点和连线数据"""
@@ -334,7 +338,6 @@ class UserWindow(QMainWindow):
                         end_node.channelList.append(channel)
                         print(f"append成功, start_node的Channel列表为{start_node.channelList}")
                         print(f"start_node的id为：{id(start_node)}")
-
                 
                 print(f"数据已成功从 {filename} 加载")
         except Exception as e:
@@ -343,10 +346,10 @@ class UserWindow(QMainWindow):
     
     def type_to_name(self, nodetype):
         nameDict = {"UserNode": "用户节点", 
-                    "ComputingNode": "算力节点", 
+                    "ComputeNode": "算力节点", 
                     "UserGateway": "用户网关", 
                     "ComputingGateway": "算力网关",
-                    "DecisionRouter": "调度决策网关", 
+                    "ComputeScheduleNode": "调度决策网关",
                     "Router": "路由器"}
         return nameDict.get(nodetype, None)
 

@@ -94,16 +94,18 @@ class NodeItem(QGraphicsItem, QObject):
         self.proxy = QGraphicsProxyWidget(self)
         # 创建一个 QLineEdit 用于显示和编辑节点名称
         self.text_edit = QLineEdit(self.name)
+        # 添加以下代码设置文本框只读
+        self.text_edit.setReadOnly(True)  # 禁止编辑节点名称
         # 设置 QLineEdit 的样式，背景透明，有灰色边框，最大宽度为 75px
         self.text_edit.setStyleSheet("""
             QLineEdit { 
                 background: transparent; 
-                border: 1px solid gray; 
+                border: none; /* 移除边框 */ 
                 max-width: 75px;  /* 限制文本框宽度 */
             }
         """)
         # 将 QLineEdit 的 editingFinished 信号连接到 update_name 方法，当编辑完成时更新节点名称
-        self.text_edit.editingFinished.connect(self.update_name)
+        # self.text_edit.editingFinished.connect(self.update_name)
 
         # 将 QLineEdit 设置到 QGraphicsProxyWidget 中
         self.proxy.setWidget(self.text_edit)
@@ -119,10 +121,10 @@ class NodeItem(QGraphicsItem, QObject):
         """
         # 定义节点名称到类型的映射字典
         typeDict = {"用户节点": "UserNode",
-                    "算力节点": "ComputingNode",
+                    "算力节点": "ComputeNode",
                     "用户网关": "UserGateway",
                     "算力网关": "ComputingGateway",
-                    "调度决策网关": "DecisionRouter",
+                    "调度决策网关": "ComputeScheduleNode",
                     "路由器": "Router"}
         return typeDict.get(nodeName, None)
 
@@ -212,12 +214,14 @@ class NodeItem(QGraphicsItem, QObject):
         """
         # 定义节点类型到名称的映射字典
         nameDict = {"UserNode": "用户节点",
-                    "ComputingNode": "算力节点",
+                    "ComputeNode": "算力节点",
+                    # "ComputingNode": "算力节点",
                     "UserGateway": "用户网关",
-                    "UserRouter": "用户网关",
-                    "ComputingRouter": "算力网关",
+                    # "UserRouter": "用户网关",
+                    # "ComputingRouter": "算力网关",
                     "ComputingGateway": "算力网关",
-                    "DecisionRouter": "调度决策网关",
+                    "ComputeScheduleNode": "调度决策网关",
+                    # "DecisionRouter": "调度决策网关",
                     "Router": "路由器"}
         return nameDict.get(nodetype, None)
 
@@ -251,21 +255,6 @@ class NodeItem(QGraphicsItem, QObject):
             painter.setBrush(Qt.NoBrush)
             painter.drawRect(rect)
 
-    def mouseDoubleClickEvent(self, event):
-        """
-        处理节点的鼠标双击事件，聚焦到文本框。
-
-        :param event: 鼠标事件
-        """
-        # 双击时聚焦到文本框
-        self.text_edit.setFocus()
-
-    def update_name(self):
-        """
-        更新节点的名称，将文本框中的内容赋值给节点名称属性。
-        """
-        self.name = self.text_edit.text()
-
     def mousePressEvent(self, event):
         """
         处理节点的鼠标按下事件，支持选中和缩放操作。
@@ -273,14 +262,17 @@ class NodeItem(QGraphicsItem, QObject):
         :param event: 鼠标事件
         """
         # 选中节点（如果尚未选中）
-        if not self.isSelected():
-            self.setSelected(True)
+        scene = self.scene()
+        if scene:
+            for item in scene.items():
+                if isinstance(item, NodeItem) and item != self:
+                    item.setSelected(False)
+        # 选中当前节点
+        self.setSelected(True)
 
         # 如果按下Ctrl键且节点已选中，准备缩放
         if event.modifiers() == Qt.ControlModifier and self.isSelected():
             self.is_resizing = True
-            # self.start_pos = event.pos()
-            # self.start_scale = self.scale_factor
             event.accept()
         else:
             # 否则准备移动
@@ -315,18 +307,6 @@ class NodeItem(QGraphicsItem, QObject):
         else:
             # 移动逻辑
             super().mouseMoveEvent(event)
-
-    def mouseReleaseEvent(self, event):
-        """
-        处理节点的鼠标释放事件，结束缩放操作。
-
-        :param event: 鼠标事件
-        """
-        if self.is_resizing:
-            self.is_resizing = False
-            event.accept()
-        else:
-            super().mouseReleaseEvent(event)
 
     def mouseReleaseEvent(self, event):
         """
@@ -377,7 +357,7 @@ class NodeItem(QGraphicsItem, QObject):
 
         # "删除"菜单项
         delete_action = QAction("删除", self.scene())
-        delete_action.triggered.connect(self.delete_node)
+        delete_action.triggered.connect(lambda: self.delete_node())
         menu.addAction(delete_action)
 
         # 显示菜单
@@ -404,10 +384,11 @@ class NodeItem(QGraphicsItem, QObject):
         # 逆序遍历通道列表，删除每个通道
         for channel in self.channelList[::-1]:
             channel.delete_channel()
-
+        # global_nodes.remove(self)
         try:
             # 发射 delete_self 信号，通知其他对象节点已删除
             self.delete_self.emit(self)
+            print("成功")
         except Exception as e:
             print(f"Error in delete_channel: {e}")
 

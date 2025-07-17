@@ -4,29 +4,33 @@ from PySide6.QtCore import QLineF, QPointF, QObject
 from PySide6.QtGui import QPen, QColor, QAction
 from PySide6 import QtWidgets
 from PySide6.QtCore import Signal, Slot
+from nltk.sem.logic import AnyType
+
 from nodeItem import NodeItem
-from set_channel_widget import SetChannelWidget
 
 class ChannelInfo:
+    delete_request = Signal(object)
     def __init__(self, channel):
         self.start_type = channel.start_item.nodetype
         self.start_index = channel.start_item.index
         self.end_type = channel.end_item.nodetype
         self.end_index = channel.end_item.index
-        self.bandwidth = channel.bandwidth
+        self.bandwidth = channel.bandwidth 
+        self.banddelay = channel.banddelay
         self.start_interface_index = channel.start_interface_index
         self.end_interface_index = channel.end_interface_index
 
 class Channel(QGraphicsLineItem, QObject):
     delete_self = Signal(object)  # 发送被删除的对象自身
 
-    def __init__(self, start_item, end_item, channelInfo=None, parent=None):
+    def __init__(self, start_item, end_item, channelInfo=None ,parent=None):
         super().__init__(parent)
         QObject.__init__(self)  # 确保初始化 QObject
         self.start_item = start_item
         self.end_item = end_item
         if not channelInfo:
-            self.bandwidth = 100  # 默认带宽
+            self.bandwidth = 100.0  # 默认带宽
+            self.banddelay = 10.0  # 默认时延
             self.start_interface_index = start_item.interface_counter
             self.end_interface_index = end_item.interface_counter
         else:
@@ -72,6 +76,7 @@ class Channel(QGraphicsLineItem, QObject):
     def __getstate__(self):
         return {
             "bandwidth": self.bandwidth,
+            "banddelay": self.banddelay,
             "start_name": self.start_item.name if self.start_item else None,
             "end_name": self.end_item.name if self.end_item else None,
             "start_interface_index": self.start_interface_index if self.start_interface_index != 0 else None,
@@ -112,15 +117,13 @@ class Channel(QGraphicsLineItem, QObject):
 
     def show_channel_widget(self):
         # 创建并显示带宽设置对话框
-        self.widget = SetChannelWidget(None, self.bandwidth, self)
+        self.widget = SetChannelWidget(None, self.bandwidth, self.banddelay, self)
         self.widget.ui.show()        
         
         # 将信号与更新带宽方法连接
         self.widget.channel_set.connect(self.update_channel)
         
     def delete_channel(self):
-
-
         self.start_item.interface_counter -= 1
         self.end_item.interface_counter -= 1
 
@@ -162,6 +165,7 @@ class Channel(QGraphicsLineItem, QObject):
         # 删除当前通道对象（根据需求删除）
         self.start_item.channelList.remove(self)
         self.end_item.channelList.remove(self)
+        # global_channels.remove(self)
         print(f"start为{self.start_item.name}, 列表为{self.start_item.channelList}")
         print(f"end为{self.end_item.name},列表为{self.end_item.channelList}")
 
@@ -188,10 +192,11 @@ class Channel(QGraphicsLineItem, QObject):
         print("删除通道")
         del self
 
-    def update_channel(self, new_bandwidth):
-        if new_bandwidth > 0 :
-            #self.bandwidth = new_bandwidth
-            print(f"update成功，新带宽为{self.bandwidth} Mbps")
+    def update_channel(self, new_bandwidth, new_banddelay):
+        if new_bandwidth >= 0 and new_banddelay >= 0:
+            self.bandwidth = new_bandwidth
+            self.banddelay = new_banddelay
+            print(f"通道带宽更新为: {self.bandwidth} Mbps，时延更新为: {self.banddelay} ms")
         else:
             print("更新失败")
         

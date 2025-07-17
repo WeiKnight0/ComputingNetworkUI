@@ -7,6 +7,7 @@ from set_userNode_widget import SetUserNodeWidget
 from set_userGateway_widget import SetUserGatewayWidget
 from set_computingGateway_widget import SetComputingGatewayWidget
 from set_IPConfig_widget import IPConfigWidget
+# from temp.allTypeItem import DecisionRouter
 
 
 # 定义用户节点类，继承自NodeItem
@@ -52,10 +53,10 @@ class UserNode(NodeItem):
 
 
 # 定义算力节点类，继承自NodeItem
-class ComputingNode(NodeItem):
+class ComputeNode(NodeItem):
     def __init__(self, name, index, icon_path, firstCreate=True, parent=None):
         # 调用父类的构造函数，初始化节点的基本属性
-        super().__init__(name, "ComputingNode", index, icon_path, firstCreate, parent)
+        super().__init__(name, "ComputeNode", index, icon_path, firstCreate, parent)
         if firstCreate == True:
             # 算力节点特有的属性，存储容量
             self.storage = 1024  # 其他算力节点的行为
@@ -75,7 +76,7 @@ class ComputingNode(NodeItem):
 
     # 算力节点特有的方法
     def custom_method(self):
-        print("This is a ComputingNode.")
+        print("This is a ComputeNode.")
 
 
 # 定义路由器类，继承自NodeItem
@@ -133,10 +134,10 @@ class ComputingGateway(Router):
 
 
 # 定义调度决策网关类，继承自NodeItem
-class DecisionRouter(NodeItem):
+class ComputeScheduleNode(NodeItem):
     def __init__(self, name, index, icon_path, firstCreate=True, parent=None):
         # 调用父类的构造函数，初始化节点的基本属性
-        super().__init__(name, "DecisionRouter", index, icon_path, firstCreate, parent)
+        super().__init__(name, "ComputeScheduleNode", index, icon_path, firstCreate, parent)
         if firstCreate == True:
             # 调度决策网关特有的属性，颜色
             self.color = "green"
@@ -147,5 +148,3 @@ class DecisionRouter(NodeItem):
     def custom_method(self):
         print("This is a UserGateway.")
 
-# UserRouter = UserGateway
-# ComputingRouter = ComputingGateway
