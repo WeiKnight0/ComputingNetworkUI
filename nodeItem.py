@@ -3,14 +3,32 @@ import pickle
 import base64
 import traceback
 import weakref
-from PySide6.QtWidgets import (QApplication, QMainWindow, QGraphicsView,
-                               QGraphicsScene, QGraphicsItem, QListWidget,
-                               QMenu, QGraphicsProxyWidget, QLineEdit,
-                               QGraphicsPixmapItem)
+from PySide6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QGraphicsView,
+    QGraphicsScene,
+    QGraphicsItem,
+    QListWidget,
+    QMenu,
+    QGraphicsProxyWidget,
+    QLineEdit,
+    QGraphicsPixmapItem,
+)
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import (Qt, QPointF, QRectF, QLineF, QEvent, QObject,
-                            Signal, QByteArray, QBuffer, QIODevice,
-                            SignalInstance)
+from PySide6.QtCore import (
+    Qt,
+    QPointF,
+    QRectF,
+    QLineF,
+    QEvent,
+    QObject,
+    Signal,
+    QByteArray,
+    QBuffer,
+    QIODevice,
+    SignalInstance,
+)
 from PySide6.QtGui import QPixmap, QPen, QColor, QTransform, QAction
 from io import BytesIO
 
@@ -22,7 +40,9 @@ class NodeItem(QGraphicsItem, QObject):
     # 记录 pickle.load 期间创建的实例
     # _pickle_instances = weakref.WeakSet()
 
-    def __init__(self, name:str, nodetype, index, icon_path, firstCreate=True, parent=None):
+    def __init__(
+        self, name: str, nodetype, index, icon_path, firstCreate=True, parent=None
+    ):
         """
         节点项的构造函数。
 
@@ -45,10 +65,6 @@ class NodeItem(QGraphicsItem, QObject):
         self.interface_counter = 0
         # 存储接口 ID 到对象的映射列表
         self.interface_id_to_object = []
-        print(f"创建的类型为：{self.nodetype}")
-        print(f"self.index的值为:{self.index}")
-        print(f"init时self.id为{id(self)}")
-        print("firstCreated的值为：%s" % firstCreate)
 
         self.icon_path = icon_path
         # 加载节点图标
@@ -59,16 +75,17 @@ class NodeItem(QGraphicsItem, QObject):
         # 初始化节点的控件，初始值为 0
         self.widget = 0
 
-        if firstCreate == True:
+        if True:
             # 首次创建节点时，设置默认的 IP 地址和子网掩码
-            self.ip = '111.111.111.111'
-            self.mask = '255.255.255.255'
+            self.ip = "111.111.111.111"
+            self.mask = "255.255.255.255"
             # 初始缩放因子为 1.0
             self.scale_factor = 1.0
             # 标记节点是否正在进行缩放操作
             self.is_resizing = False
         else:
             # 如果不是首次创建，根据缩放因子设置节点的变换
+            print("aaaa")
             self.setTransform(QTransform().scale(self.scale_factor, self.scale_factor))
 
         # 定义节点选中时的边框样式，蓝色虚线边框，线宽为 2
@@ -97,13 +114,16 @@ class NodeItem(QGraphicsItem, QObject):
         # 添加以下代码设置文本框只读
         self.text_edit.setReadOnly(True)  # 禁止编辑节点名称
         # 设置 QLineEdit 的样式，背景透明，有灰色边框，最大宽度为 75px
-        self.text_edit.setStyleSheet("""
+        self.text_edit.setStyleSheet(
+            """
             QLineEdit { 
                 background: transparent; 
                 border: none; /* 移除边框 */ 
                 max-width: 75px;  /* 限制文本框宽度 */
+                color: black; /* 明确设置文字颜色 */
             }
-        """)
+            """
+        )
         # 将 QLineEdit 的 editingFinished 信号连接到 update_name 方法，当编辑完成时更新节点名称
         # self.text_edit.editingFinished.connect(self.update_name)
 
@@ -120,12 +140,14 @@ class NodeItem(QGraphicsItem, QObject):
         :return: 节点的类型，如果未找到则返回 None
         """
         # 定义节点名称到类型的映射字典
-        typeDict = {"用户节点": "UserNode",
-                    "算力节点": "ComputeNode",
-                    "用户网关": "UserGateway",
-                    "算力网关": "ComputingGateway",
-                    "调度决策网关": "ComputeScheduleNode",
-                    "路由器": "Router"}
+        typeDict = {
+            "用户节点": "UserNode",
+            "算力节点": "ComputeNode",
+            "用户网关": "UserGateway",
+            "算力网关": "ComputingGateway",
+            "调度决策网关": "ComputeScheduleNode",
+            "路由器": "Router",
+        }
         return typeDict.get(nodeName, None)
 
     def __getstate__(self):
@@ -144,7 +166,9 @@ class NodeItem(QGraphicsItem, QObject):
                 continue
 
             # 跳过 QPixmap 类型的属性，因为它不可直接序列化
-            elif isinstance(value, QPixmap) or isinstance(value, QPen):# QPen是我添加的，添加之后报错了
+            elif isinstance(value, QPixmap) or isinstance(
+                value, QPen
+            ):  # QPen是我添加的，添加之后报错了
                 # 处理 QPixmap 或 QPen
                 continue
 
@@ -201,7 +225,7 @@ class NodeItem(QGraphicsItem, QObject):
         print(f"完成赋值时id为{id(self)}")
         # 根据节点类型获取节点名称
         name = self.type_to_name(self.nodetype)
-        print('此时的name和nodetype：',name,self.nodetype)
+        print("此时的name和nodetype：", name, self.nodetype)
         # 调用 __init__ 方法进行非首次创建的初始化
         self.__init__(name, self.index, self.icon_path, firstCreate=False)
 
@@ -213,16 +237,18 @@ class NodeItem(QGraphicsItem, QObject):
         :return: 节点的名称，如果未找到则返回 None
         """
         # 定义节点类型到名称的映射字典
-        nameDict = {"UserNode": "用户节点",
-                    "ComputeNode": "算力节点",
-                    # "ComputingNode": "算力节点",
-                    "UserGateway": "用户网关",
-                    # "UserRouter": "用户网关",
-                    # "ComputingRouter": "算力网关",
-                    "ComputingGateway": "算力网关",
-                    "ComputeScheduleNode": "调度决策网关",
-                    # "DecisionRouter": "调度决策网关",
-                    "Router": "路由器"}
+        nameDict = {
+            "UserNode": "用户节点",
+            "ComputeNode": "算力节点",
+            # "ComputingNode": "算力节点",
+            "UserGateway": "用户网关",
+            # "UserRouter": "用户网关",
+            # "ComputingRouter": "算力网关",
+            "ComputingGateway": "算力网关",
+            "ComputeScheduleNode": "调度决策网关",
+            # "DecisionRouter": "调度决策网关",
+            "Router": "路由器",
+        }
         return nameDict.get(nodetype, None)
 
     def boundingRect(self):
@@ -232,9 +258,12 @@ class NodeItem(QGraphicsItem, QObject):
         :return: 节点的边界矩形
         """
         # 计算包含图标和文本框的总区域
-        return QRectF(0, 0,
-                      max(self.icon.width(), self.text_edit.width()),
-                      self.icon.height() + self.text_edit.height() + 5)
+        return QRectF(
+            0,
+            0,
+            max(self.icon.width(), self.text_edit.width()),
+            self.icon.height() + self.text_edit.height() + 5,
+        )
 
     def paint(self, painter, option, widget=None):
         """
@@ -245,7 +274,7 @@ class NodeItem(QGraphicsItem, QObject):
         :param widget: 绘图的父控件，默认为 None
         """
         # 绘制图标
-        if hasattr(self, 'icon'):
+        if hasattr(self, "icon"):
             painter.drawPixmap(0, 0, self.icon)
 
         # 绘制选中状态边框
@@ -333,8 +362,10 @@ class NodeItem(QGraphicsItem, QObject):
         # print("进入item_changed")
         # print(f"self的id为：{id(self)}")
         # print(f"self.channelList的值：{self.channelList}")
-        if (change == QGraphicsItem.ItemPositionChange
-            or change == QGraphicsItem.ItemTransformChange) and self.channelList:
+        if (
+            change == QGraphicsItem.ItemPositionChange
+            or change == QGraphicsItem.ItemTransformChange
+        ) and self.channelList:
             # self.position_changed.emit()  # 位置发生变化，发射信号
             for channel in self.channelList:
                 # 调用通道的 update_position 方法更新连线位置
@@ -423,5 +454,19 @@ class NodeItem(QGraphicsItem, QObject):
         :return: 找到的接口元组，如果未找到则返回 None
         """
         for interface_id_to_object in self.interface_id_to_object:
-            if interface_id_to_object[1] == type(node) and interface_id_to_object[2] == node.index:
+            if (
+                interface_id_to_object[1] == type(node)
+                and interface_id_to_object[2] == node.index
+            ):
                 return interface_id_to_object
+
+    def clone(self):
+        name = self.type_to_name(self.nodetype)
+        # 创建新的节点实例
+        new_node = self.__class__(name, self.index, self.icon_path, firstCreate=False)
+        new_node.setPos(self.pos())  # 要产生一个偏移
+        # 复制其他属性
+        new_node.ip = self.ip
+        new_node.mask = self.mask
+        new_node.scale_factor = self.scale_factor
+        return new_node
