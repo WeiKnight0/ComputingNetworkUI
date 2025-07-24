@@ -1,0 +1,73 @@
+{
+"globalInfo": {
+"taskThroughput": {
+"value": 4.8,
+"description": "系统在单位时间内成功完成的任务数量 (总完成任务数 / 总仿真时长)"
+}
+},
+"computeNodeInfo": [
+{
+"computeNodeId": 201,
+"loadBalancingMetrics": {
+"averageUtilization": {
+"value": 75.8,
+"description": "节点利用率：仿真期间，节点处于'处理任务'状态的时间占总时间的百分比"
+},
+"totalAssignedTasks": {
+"value": 25,
+"description": "仿真结束时，分配给此节点的总任务数"
+},
+"totalProcessedLoad": {
+"value": 6540.0,
+"description": "仿真结束时，此节点处理的所有任务的计算量之和"
+}
+},
+"energyConsumption": {
+"value": 4320.7,
+"description": "算力节点总能耗 = (静态功耗 * 总运行时长) + (动态功耗 * 总繁忙时长)"
+}
+},
+{
+"computeNodeId": 202,
+"loadBalancingMetrics": {
+"averageUtilization": { "value": 62.1, "description": "..." },
+"totalAssignedTasks": { "value": 23, "description": "..." },
+"totalProcessedLoad": { "value": 6040.5, "description": "..." }
+},
+"energyConsumption": {
+"value": 4219.6,
+"description": "..."
+}
+}
+],
+"taskInfo": [
+{
+"taskId": 1,
+"userNodeId": 1,
+"status": "COMPLETED",
+"computeNodeId": 201,
+"delayDistribution": {
+"endToEndDelay": {
+"value": 3.45,
+"description": "端到端任务延迟: 任务从用户节点发出到最终用户接收到结果消息的总时延"
+},
+"computationTime": {
+"value": 3.40,
+"description": "任务计算时长: 任务到达算力节点至处理完成的时延"
+}
+},
+"cost": {
+"value": 0.017,
+"description": "任务成本: 任务计算时长 * 所在算力节点的价格"
+}
+},
+{
+"taskId": 2,
+"userNodeId": 1,
+"status": "UNCOMPLETED",
+"computeNodeId": -1,
+"delayDistribution": null,
+"cost": { "value": 0, "description": "未成功处理的任务成本为0" }
+}
+]
+}
