@@ -1,0 +1,17 @@
+# Global Metrics
+taskThroughput,taskThroughput_description
+4.8,系统在单位时间内成功完成的任务数量 (总完成任务数 / 总仿真时长)
+
+
+# Compute Node Metrics
+computeNodeId,lb_averageUtilization,lb_averageUtilization_description,lb_totalProcessedLoad,lb_totalProcessedLoad_description,energyConsumption,energyConsumption_description
+201,75.8,节点利用率：仿真期间，节点处于'处理任务'状态的时间占总时间的百分比,6540.0,仿真结束时，此节点处理的所有任务的计算量之和,4320.7,算力节点总能耗 = (静态功耗 * 总运行时长) + (动态功耗 * 总繁忙时长)
+202,62.1,...,6040.5,...,4219.6,...
+
+
+# Task Metrics
+taskId,userNodeId,status,computeNodeId,delay_endToEndDelay,delay_endToEndDelay_description,cost,cost_description
+1,1,COMPLETED,201,3.45,端到端任务延迟: 任务从用户节点发出到最终用户接收到结果消息的总时延,0.017,任务成本: 任务计算时长 * 所在算力节点的价格
+2,1,UNCOMPLETED,-1,,,0.0,未成功处理的任务成本为0
+
+
