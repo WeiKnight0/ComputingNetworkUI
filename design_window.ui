@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>606</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QGraphicsView" name="graphicsView">
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="backgroundBrush">
+       <brush brushstyle="NoBrush">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </property>
+      <property name="foregroundBrush">
+       <brush brushstyle="NoBrush">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QListWidget" name="listWidget">
+      <property name="minimumSize">
+       <size>
+        <width>150</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>200</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <item>
+       <property name="text">
+        <string>用户节点</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icon/用户节点.png</normaloff>icon/用户节点.png</iconset>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>算力节点</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icon/算力节点.png</normaloff>icon/算力节点.png</iconset>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>用户网关</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icon/用户网关.png</normaloff>icon/用户网关.png</iconset>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>算力网关</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icon/算力网关.png</normaloff>icon/算力网关.png</iconset>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>调度决策网关</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icon/调度决策网关.png</normaloff>icon/调度决策网关.png</iconset>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>路由器</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>icon/路由器.png</normaloff>icon/路由器.png</iconset>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="2">
+     <widget class="QLabel" name="statusLabel">
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>33</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>开始</string>
+    </property>
+    <addaction name="actionsubmit"/>
+    <addaction name="actionclear"/>
+    <addaction name="actionsave"/>
+    <addaction name="actionload"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>网络仿真</string>
+    </property>
+    <addaction name="actionconfig"/>
+    <addaction name="actionrun"/>
+    <addaction name="actionexport"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <action name="actionsubmit">
+   <property name="text">
+    <string>提交</string>
+   </property>
+  </action>
+  <action name="actionclear">
+   <property name="text">
+    <string>清除</string>
+   </property>
+  </action>
+  <action name="actionsave">
+   <property name="text">
+    <string>保存网络</string>
+   </property>
+  </action>
+  <action name="actionload">
+   <property name="text">
+    <string>加载网络</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>运行</string>
+   </property>
+  </action>
+  <action name="actionrun">
+   <property name="text">
+    <string>运行</string>
+   </property>
+  </action>
+  <action name="actionexport">
+   <property name="text">
+    <string>导出结果</string>
+   </property>
+  </action>
+  <action name="actionconfig">
+   <property name="text">
+    <string>配置OMNet++</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

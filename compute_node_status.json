@@ -1,0 +1,87 @@
+[
+    {
+        "timestamp": 10.0,
+        "nodeStates": [
+            {
+                "nodeId": 201,
+                "gatewayId": 401,
+                "ipAddress": "192.168.1.10",
+                "subnetMask": "255.255.255.0",
+                "computeType": 0,
+                "computeCapacity": 1.2e12,
+                "availableStorage": 512,
+                "switchCapacitance": 0.5,
+                "staticPower": 10.0,
+                "price": 0.005,
+                "taskQueue": [
+                    {
+                        "taskId": "101-1",
+                        "queuingTime_s": 1.2
+                    },
+                    {
+                        "taskId": "102-3",
+                        "queuingTime_s": 0.5
+                    }
+                ]
+            },
+            {
+                "nodeId": 202,
+                "gatewayId": 401,
+                "ipAddress": "192.168.1.11",
+                "subnetMask": "255.255.255.0",
+                "computeType": 1,
+                "computeCapacity": 5.0e12,
+                "availableStorage": 1024,
+                "switchCapacitance": 0.8,
+                "staticPower": 15.0,
+                "price": 0.020,
+                "taskQueue": []
+            }
+        ]
+    },
+    {
+        "timestamp": 11.0,
+        "nodeStates": [
+            {
+                "nodeId": 201,
+                "gatewayId": 401,
+                "ipAddress": "192.168.1.10",
+                "subnetMask": "255.255.255.0",
+                "computeType": 0,
+                "computeCapacity": 1.2e12,
+                "availableStorage": 512,
+                "switchCapacitance": 0.5,
+                "staticPower": 10.0,
+                "price": 0.005,
+                "taskQueue": [
+                    {
+                        "taskId": "101-1",
+                        "queuingTime_s": 2.2
+                    },
+                    {
+                        "taskId": "102-3",
+                        "queuingTime_s": 1.5
+                    }
+                ]
+            },
+            {
+                "nodeId": 202,
+                "gatewayId": 401,
+                "ipAddress": "192.168.1.11",
+                "subnetMask": "255.255.255.0",
+                "computeType": 1,
+                "computeCapacity": 5.0e12,
+                "availableStorage": 1024,
+                "switchCapacitance": 0.8,
+                "staticPower": 15.0,
+                "price": 0.020,
+                "taskQueue": [
+                    {
+                        "taskId": "103-1",
+                        "queuingTime_s": 0.1
+                    }
+                ]
+            }
+        ]
+    }
+]

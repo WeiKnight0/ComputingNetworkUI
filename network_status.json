@@ -1,0 +1,30 @@
+[
+  {
+    "timestamp": 1.50,
+    "triggeringTaskId": 1,
+    "triggeringUserNodeId": 101,
+    "delayVector": {
+      "computeNodeIds": [201, 202, 203],
+      "delays": [12.5, 25.3, 30.1]
+    },
+    "packetLoss": {
+      "packetsSentSinceLastLog": 1500,
+      "packetsDroppedSinceLastLog": 5,
+      "packetLossRate": 0.33
+    }
+  },
+  {
+    "timestamp": 2.30,
+    "triggeringTaskId": 2,
+    "triggeringUserNodeId": 102,
+    "delayVector": {
+      "computeNodeIds": [201, 202, 203],
+      "delays": [20.3, 28.5, 48.0]
+    },
+    "packetLoss": {
+      "packetsSentSinceLastLog": 1800,
+      "packetsDroppedSinceLastLog": 15,
+      "packetLossRate": 0.83
+    }
+  }
+]
