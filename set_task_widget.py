@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QLineEdit, QPushButton, QVBoxLayout, 
                               QHBoxLayout, QLabel, QComboBox, QDateTimeEdit, 
                               QMessageBox, QTableWidget, QTableWidgetItem, QGridLayout,
-                              QHeaderView, QFrame, QAbstractItemView)
+                              QHeaderView, QFrame, QAbstractItemView, QTimeEdit)
 from PySide6.QtCore import Signal, QDateTime, Qt
 import re
 
@@ -11,7 +11,7 @@ class SetTaskWidget(QWidget):
     def __init__(self, user_node, parent=None):
         super().__init__(parent)
         self.user_node = user_node
-        self.base_time = QDateTime(2025, 1, 1, 0, 0, 0)
+        self.base_time = QDateTime(2000, 1, 1, 0, 0, 0)
         self.init_ui()
         self.load_tasks()
 
@@ -26,39 +26,20 @@ class SetTaskWidget(QWidget):
         main_layout.setContentsMargins(15, 15, 15, 15)
         main_layout.setSpacing(15)
 
-        # === 基准时间显示 ===
-        base_time_frame = QFrame()
-        base_time_frame.setFrameShape(QFrame.StyledPanel)
-        base_time_layout = QHBoxLayout(base_time_frame)
-        base_time_label = QLabel("基准时间:")
-        self.base_time_display = QLabel(self.base_time.toString("yyyy-MM-dd HH:mm:ss"))
-        base_time_layout.addWidget(base_time_label)
-        base_time_layout.addWidget(self.base_time_display)
-        main_layout.addWidget(base_time_frame)
-        
         # === 任务表单区域 ===
         form_group = QFrame()
         form_group.setFrameShape(QFrame.StyledPanel)
         form_layout = QGridLayout(form_group)
         form_layout.setColumnStretch(0, 1)
         form_layout.setColumnStretch(1, 3)
-        
-        # 任务产生的时刻
-        form_layout.addWidget(QLabel("任务产生的时刻:"), 0, 0, Qt.AlignRight)
-        self.time_edit = QDateTimeEdit(QDateTime.currentDateTime())
-        self.time_edit.setDisplayFormat("yyyy-MM-dd HH:mm:ss")
-        self.time_edit.setMinimumWidth (220)
-        self.time_edit.setCalendarPopup (True) # 支持日历选择
+
+        # 任务产生的时刻（修改为时分秒）
+        form_layout.addWidget(QLabel("任务产生的时刻(HH:MM:SS):"), 0, 0, Qt.AlignRight)
+        self.time_edit = QTimeEdit()
+        self.time_edit.setDisplayFormat("HH:mm:ss")
+        self.time_edit.setMinimumWidth(220)
         form_layout.addWidget(self.time_edit, 0, 1)
-        
-        # 相对基准时间显示
-        form_layout.addWidget(QLabel("相对基准时间:"), 1, 0, Qt.AlignRight)
-        self.relative_time_display = QLabel("0秒")
-        self.relative_time_display.setStyleSheet ("color: #666; font-style: italic;")
-        form_layout.addWidget(self.relative_time_display, 1, 1)
-        
-        # 连接时间变化信号，实时更新相对时间
-        self.time_edit.dateTimeChanged.connect(self.update_relative_time)
+
 
         # 所需算力类型
         form_layout.addWidget(QLabel("所需算力类型:"), 2, 0, Qt.AlignRight)
@@ -125,9 +106,9 @@ class SetTaskWidget(QWidget):
         main_layout.addWidget(QLabel("已添加任务:"))
         
         self.task_table = QTableWidget()
-        self.task_table.setColumnCount(9)
+        self.task_table.setColumnCount(8)
         self.task_table.setHorizontalHeaderLabels([
-            "任务编号", "产生时刻", "相对基准时间（秒）", "算力类型", "存储空间(GB)", 
+            "任务编号", "产生时刻", "算力类型", "存储空间(GB)", 
             "计算量(10^8 Cycles)", "传输量(GB)", "最大时延(s)", "预算(元)"
         ])
         self.task_table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -147,21 +128,6 @@ class SetTaskWidget(QWidget):
         # 调整窗口大小
         self.resize(800, 600)
 
-    # 新增相对时间计算方法
-    def update_relative_time(self):
-        try:
-            task_time = self.time_edit.dateTime()
-            secs = self.base_time.secsTo(task_time)
-            
-            if secs < 0:
-                self.relative_time_display.setText("早于基准时间")
-                return
-                
-            self.relative_time_display.setText(f"{secs}")
-        except Exception as e:
-            print(f"更新相对时间出错: {e}")
-            self.relative_time_display.setText("计算错误")
-
     # 加载并显示用户节点的所有任务
     def load_tasks(self):
         self.task_table.setRowCount(len(self.user_node.task_queue))
@@ -171,36 +137,39 @@ class SetTaskWidget(QWidget):
             self.task_table.setItem(row, 0, QTableWidgetItem(str(task["任务编号"])))
             
             # 产生时刻
-            self.task_table.setItem(row, 1, QTableWidgetItem(task["任务产生的时刻"]))
-            
-            # 相对基准时间(秒)
-            self.task_table.setItem(row, 2, QTableWidgetItem(str(task["相对基准时间"])))
+            total_seconds = task["任务产生的时刻"]
+            hours = total_seconds // 3600
+            minutes = (total_seconds % 3600) // 60
+            seconds = total_seconds % 60
+            time_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+            self.task_table.setItem(row, 1, QTableWidgetItem(time_str))
             
             # 算力类型
-            self.task_table.setItem(row, 3, QTableWidgetItem("CPU" if task["所需算力类型"] == 0 else "GPU"))
+            self.task_table.setItem(row, 2, QTableWidgetItem("CPU" if task["所需算力类型"] == 0 else "GPU"))
             
             # 存储空间
-            self.task_table.setItem(row, 4, QTableWidgetItem(f"{task['任务所需存储空间']:.2f}"))
+            self.task_table.setItem(row, 3, QTableWidgetItem(f"{task['任务所需存储空间']:.2f}"))
             
             # 计算量
-            self.task_table.setItem(row, 5, QTableWidgetItem(f"{task['任务计算量']:.2f}"))
+            self.task_table.setItem(row, 4, QTableWidgetItem(f"{task['任务计算量']:.2f}"))
             
             # 传输量
-            self.task_table.setItem(row, 6, QTableWidgetItem(f"{task['任务传输量']:.2f}"))
+            self.task_table.setItem(row, 5, QTableWidgetItem(f"{task['任务传输量']:.2f}"))
             
             # 最大时延
-            self.task_table.setItem(row, 7, QTableWidgetItem(f"{task['最大时延要求']:.2f}"))
+            self.task_table.setItem(row, 6, QTableWidgetItem(f"{task['最大时延要求']:.2f}"))
 
             # 预算
-            self.task_table.setItem(row, 8, QTableWidgetItem(f"{task['预算']:.2f}"))
+            self.task_table.setItem(row, 7, QTableWidgetItem(f"{task['预算']:.2f}"))
 
     def accept_update(self):
         # 输入验证
         try:
             # 任务时间验证
-            task_time = self.time_edit.dateTime()
-            if task_time < self.base_time:
-                raise ValueError("任务时间不能早于基准时间")
+            # 任务时间验证（修改为时分秒）
+            time_str = self.time_edit.time().toString("HH:mm:ss")
+            h, m, s = map(int, time_str.split(':'))
+            total_seconds = h * 3600 + m * 60 + s
 
             # 存储空间验证
             if not self.storage_space_edit.text().strip():
@@ -247,9 +216,8 @@ class SetTaskWidget(QWidget):
         # 获取输入并创建新任务
         task_info = {
             "任务编号": len(self.user_node.task_queue) + 1,
-            "所属用户节点编号": self.user_node.index + 1,
-            "任务产生的时刻": self.time_edit.dateTime().toString("yyyy-MM -dd HH:mm:ss"),
-            "相对基准时间": int(self.relative_time_display.text()),
+            "所属用户节点编号": self.user_node.index,
+            "任务产生的时刻": total_seconds,
             "所需算力类型": self.computing_type_combo.currentData(),
             "任务所需存储空间": float(self.storage_space_edit.text()),
             "任务计算量": float(self.computing_amount_edit.text()),
@@ -273,7 +241,7 @@ class SetTaskWidget(QWidget):
         
         # 显示成功消息
         QMessageBox.information(self, "成功", f"任务 {task_info['任务编号']} 添加成功")
-        
+
         # 发射更新信号
         self.task_updated.emit()
 

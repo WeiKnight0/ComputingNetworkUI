@@ -5,7 +5,8 @@ from channel import Channel
 class AddNodeCommand(QUndoCommand):
     def __init__(self, window, node_name, node_type, icon_path):
         super().__init__()
-        self.window = window
+        from user_window import UserWindow
+        self.window:UserWindow = window
         self.node_name = node_name
         self.node_type = node_type
         self.icon_path = icon_path
@@ -14,9 +15,11 @@ class AddNodeCommand(QUndoCommand):
     def redo(self):
         # 执行添加节点操作
         if self.node is None:
-            index = self.window.typeNumDict[self.node_type]
+            self.window.indexDict[self.node_type] += 1
+            index = self.window.indexDict[self.node_type]
             self.node = self.window.createNewItemByType(
                 self.node_type, self.node_name, index, self.icon_path)
+            # print("添加了节点",self.node_type,index)
 
             view_center = self.window.ui.graphicsView.mapToScene(
                 self.window.ui.graphicsView.viewport().rect().center())
@@ -38,12 +41,14 @@ class AddNodeCommand(QUndoCommand):
             self.window.scene.removeItem(self.node)
             self.window.nodes.remove(self.node)
             self.window.typeNumDict[self.node_type] -= 1
+            if self.node.index == self.window.indexDict[self.node.nodetype]:
+                self.window.indexDict[self.node.nodetype] -= 1
 
-            for node in self.window.nodes:
-                if node.nodetype == self.node_type and node.index > self.node.index:
-                    node.index -= 1
-                    node.name = self.window.type_to_name(node.nodetype) + str(node.index + 1)
-                    node.text_edit.setText(node.name)
+            # for node in self.window.nodes:
+            #     if node.nodetype == self.node_type and node.index > self.node.index:
+            #         node.index -= 1
+            #         node.name = self.window.type_to_name(node.nodetype) + str(node.index + 1)
+            #         node.text_edit.setText(node.name)
 
 class DeleteNodeCommand(QUndoCommand):
     def __init__(self, window, node):
@@ -79,9 +84,11 @@ class DeleteNodeCommand(QUndoCommand):
             self.window.nodes.remove(self.node)
             self.window.scene.removeItem(self.node)
             self.window.typeNumDict[node_type] -= 1
+            if self.node.index == self.window.indexDict[self.node.nodetype]:
+                self.window.indexDict[self.node.nodetype] -= 1
 
             # 更新索引
-            self.window.update_index(node_type, node_index)
+            # self.window.update_index(node_type, node_index)
 
         self.setText(f"删除 {self.node.name}")
 
@@ -93,16 +100,18 @@ class DeleteNodeCommand(QUndoCommand):
         self.window.scene.addItem(self.node)
         self.window.nodes.append(self.node)
         self.window.typeNumDict[node_type] += 1
+        if node_index > self.window.indexDict[node_type]:
+            self.window.indexDict[node_type] = node_index
 
         # 恢复索引
-        for node in self.window.nodes:
-            if node.nodetype == node_type and node.index >= node_index:
-                node.index += 1
-                node.name = self.window.type_to_name(node.nodetype) + str(node.index + 1)
-                node.text_edit.setText(node.name)
+        # for node in self.window.nodes:
+        #     if node.nodetype == node_type and node.index >= node_index:
+        #         node.index += 1
+        #         node.name = self.window.type_to_name(node.nodetype) + str(node.index + 1)
+        #         node.text_edit.setText(node.name)
 
         self.node.index = node_index
-        self.node.name = self.window.type_to_name(node_type) + str(node_index + 1)
+        self.node.name = self.window.type_to_name(node_type) + str(node_index)
         self.node.text_edit.setText(self.node.name)
 
         # 恢复链路
@@ -125,12 +134,13 @@ class DeleteNodeCommand(QUndoCommand):
             end_item.channelList.append(channel)
 
 class AddChannelCommand(QUndoCommand):
-    def __init__(self, window, start_item, end_item):
+    def __init__(self, window, start_item, end_item, pen):
         super().__init__()
         self.window = window
         self.start_item = start_item
         self.end_item = end_item
         self.channel = None
+        self.pen = pen
 
     def redo(self):
         # 执行添加链路操作
@@ -144,7 +154,7 @@ class AddChannelCommand(QUndoCommand):
                 [self.end_item.interface_counter, type(self.start_item), self.start_item.index])
 
             # 创建链路
-            self.channel = Channel(self.start_item, self.end_item)
+            self.channel = Channel(self.start_item, self.end_item,self.pen)
             self.channel.delete_self.connect(self.window.remove_channel)
 
         # 添加链路到场景和列表
@@ -203,17 +213,20 @@ class DeleteChannelCommand(QUndoCommand):
             self.end_item.interface_id_to_object.remove(self.end_interface)
 
         # 从所有相关列表中移除链路
-        if self.channel in self.start_item.channelList:
+        if self.channel in self.start_item.channelList and self.channel in self.end_item.channelList\
+                and self.channel in self.window.channels:
             self.start_item.channelList.remove(self.channel)
-        if self.channel in self.end_item.channelList:
             self.end_item.channelList.remove(self.channel)
-        if self.channel in self.window.channels:
             self.window.channels.remove(self.channel)
+        else:
+            raise RuntimeError("链路删除的bug！")
 
         # 从场景中移除链路
         self.window.scene.removeItem(self.channel)
 
         self.setText(f"删除链路: {self.start_item.name} -> {self.end_item.name}")
+
+        print("删除成功")
 
     def undo(self):
         # 恢复接口信息
@@ -238,9 +251,12 @@ class PasteCommand(QUndoCommand):
         self.setText("粘贴")
 
     def redo(self):
-        # 克隆节点
+        # 克隆节点（除了index）
         for node in self.clipboard['nodes']:
             new_node = node.clone()
+            self.window.indexDict[new_node.nodetype] += 1
+            new_node.index = self.window.indexDict[new_node.nodetype]
+            self.window.typeNumDict[new_node.nodetype] += 1
             self.window.scene.addItem(new_node)
             self.window.nodes.append(new_node)
             self.new_nodes.append(new_node)
@@ -258,6 +274,9 @@ class PasteCommand(QUndoCommand):
     def undo(self):
         # 移除新节点
         for node in self.new_nodes:
+            self.window.typeNumDict[node.nodetype] -= 1
+            if node.index == self.window.indexDict[node.nodetype]:
+                self.window.indexDict[node.nodetype] -= 1
             self.window.scene.removeItem(node)
             self.window.nodes.remove(node)
 
@@ -353,9 +372,10 @@ class CutCommand(QUndoCommand):
                 self.window.nodes.remove(node)
                 self.window.scene.removeItem(node)
                 self.window.typeNumDict[node_type] -= 1
-
+                if node.index == self.window.indexDict[node_type]:
+                    self.window.indexDict[node_type] -= 1
                 # 更新索引
-                self.window.update_index(node_type, node.index)
+                # self.window.update_index(node_type, node.index)
 
     def undo(self):
         # 恢复节点
@@ -373,13 +393,13 @@ class CutCommand(QUndoCommand):
             node.interface_id_to_object = node_info['interface_id_to_object']
             node.interface_counter = node_info['interface_counter']
 
-            # 恢复索引
-            for existing_node in self.window.nodes:
-                if existing_node.nodetype == node_type and existing_node.index >= index:
-                    existing_node.index += 1
+            # 判断索引
+            # for existing_node in self.window.nodes:
+            #     if existing_node.nodetype == node_type and existing_node.index >= index:
+            #         existing_node.index += 1
 
             node.index = index
-            node.name = self.window.type_to_name(node_type) + str(node.index + 1)
+            node.name = self.window.type_to_name(node_type) + str(node.index)
             node.text_edit.setText(node.name)
 
         # 恢复链路

@@ -1,6 +1,6 @@
 import weakref
 from PySide6.QtWidgets import QGraphicsLineItem, QMenu, QGraphicsItem, QGraphicsSimpleTextItem
-from PySide6.QtCore import QLineF, QPointF, QObject
+from PySide6.QtCore import Qt, QLineF, QPointF, QObject
 from PySide6.QtGui import QPen, QColor, QAction
 from PySide6 import QtWidgets
 from PySide6.QtCore import Signal, Slot
@@ -17,11 +17,31 @@ class ChannelInfo:
         self.banddelay = channel.banddelay
         self.start_interface_index = channel.start_interface_index
         self.end_interface_index = channel.end_interface_index
+        self.pen_dict = self._pen_to_dict(channel.pen())
+
+    def _pen_to_dict(self, pen: QPen) -> dict:
+        return {
+            "color": pen.color().name(),  # 颜色转为十六进制字符串（如 "#FF0000"）
+            "width": pen.width(),  # 线宽（整数）
+            "style": pen.style().value,  # 关键修改：获取枚举的整数值
+            "cap_style": pen.capStyle().value,
+            "join_style": pen.joinStyle().value
+        }
+
+    def get_pen(self) -> QPen:
+        pen_dict = self.pen_dict
+        pen = QPen()
+        pen.setColor(QColor(pen_dict["color"]))  # 从字符串恢复颜色
+        pen.setWidth(pen_dict["width"])
+        pen.setStyle(Qt.PenStyle(pen_dict["style"]))  # 恢复线型
+        pen.setCapStyle(Qt.PenCapStyle(pen_dict["cap_style"]))
+        pen.setJoinStyle(Qt.PenJoinStyle(pen_dict["join_style"]))
+        return pen
 
 class Channel(QGraphicsLineItem, QObject):
     delete_self = Signal(object)  # 发送被删除的对象自身
 
-    def __init__(self, start_item:NodeItem, end_item:NodeItem, channelInfo=None, parent=None):
+    def __init__(self, start_item, end_item, pen=None, channelInfo=None, parent=None):
         super().__init__(parent)
         QObject.__init__(self)  # 确保初始化 QObject
         self.start_item = start_item
@@ -31,7 +51,7 @@ class Channel(QGraphicsLineItem, QObject):
             self.banddelay = 10.0  # 默认时延
             self.start_interface_index = start_item.interface_counter
             self.end_interface_index = end_item.interface_counter
-        else:
+        elif isinstance(channelInfo, ChannelInfo):
             for key, value in channelInfo.__dict__.items():
                 if key in ("start_type", "start_index", "end_type", "end_index"):
                     continue
@@ -39,37 +59,43 @@ class Channel(QGraphicsLineItem, QObject):
                     setattr(self, key, value)
         
         self.widget = 0
-        
+        self.original_pen = None  # 存储原始笔样式
         # 设置连线样式
-        self.setPen(QPen(QColor(0, 0, 0), 2))
+        if pen is not None:
+            self.setPen(pen)
+        else:
+            self.setPen(QPen(QColor(70, 130, 180), 2, Qt.SolidLine, Qt.RoundCap))
 
-        # ✅ 创建显示接口编号的文本项
-        self.start_text = QGraphicsSimpleTextItem(str(self.start_interface_index), self)
-        self.end_text = QGraphicsSimpleTextItem(str(self.end_interface_index), self)
-        
+        self.setZValue(10)  # 确保连线在节点下方
+        self.setCacheMode(QGraphicsItem.DeviceCoordinateCache)  # 抗锯齿
+
         # 更新连线位置
         self.update_position()
                 
     def update_position(self):
-        # 根据节点位置更新连线
-        start_pos = self.start_item.scenePos() + QPointF(self.start_item.icon.width()/2 * self.start_item.scale_factor,
-                                                        self.start_item.icon.height()/2 * self.start_item.scale_factor)
-        end_pos = self.end_item.scenePos()+ QPointF(self.end_item.icon.width()/2 * self.end_item.scale_factor,
-                                                        self.end_item.icon.height()/2 * self.end_item.scale_factor)
-        self.setLine(QLineF(start_pos, end_pos))
+        """更新连线位置，使用更精确的连接点计算"""
+        line = QLineF(self.start_item.scenePos(), self.end_item.scenePos())
+        start_point = self.calculate_connection_point(self.start_item)
+        end_point = self.calculate_connection_point(self.end_item)
+        self.setLine(QLineF(start_point, end_point))
 
-            # ✅ 将文字放在线段上的位置，并稍微偏移
-        def point_along_line(start, end, ratio):
-            return start + (end - start) * ratio
+    def calculate_connection_point(self, node):
+        """计算节点与目标点的连接点"""
+        node_rect = node.boundingRect()
+        node_pos = node.scenePos()
+        center = node_pos + QPointF(node_rect.width() / 2, node_rect.height() / 2)
+        return center
 
-        
-        start_text_pos = point_along_line(start_pos, end_pos, 0.2) + QPointF(0, -10)
-        end_text_pos = point_along_line(end_pos, start_pos, 0.2) + QPointF(0, -10)
-
-        # ✅ 设置文本位置（偏移一点避免遮挡）
-        self.start_text.setPos(start_text_pos)
-        self.end_text.setPos(end_text_pos)
-
+    def itemChaFnge(self, change, value):
+        # 当选中状态改变时
+        if change == QGraphicsItem.ItemSelectedChange:
+            if value:  # 被选中
+                self.original_pen = self.pen()  # 保存原始笔样式
+                self.setPen(QPen(Qt.red, self.original_pen.width(), self.original_pen.style()))
+            else:  # 取消选中
+                if self.original_pen:
+                    self.setPen(self.original_pen)
+        return super().itemChange(change, value)
 
     def __getstate__(self):
         return {
@@ -97,6 +123,9 @@ class Channel(QGraphicsLineItem, QObject):
 
             
     def contextMenuEvent(self, event):
+        if not self.isSelected():
+            self.original_pen = self.pen()
+            self.setPen(QPen(Qt.red, self.original_pen.width(), self.original_pen.style()))
         # 右键菜单
         menu = QMenu()
         
@@ -111,7 +140,11 @@ class Channel(QGraphicsLineItem, QObject):
         menu.addAction(delete_action)
 
         # 显示菜单
-        menu.exec_(event.screenPos())
+        menu.exec(event.screenPos())
+
+        # 恢复原始笔样式（如果不是通过选中状态改变的）
+        if not self.isSelected() and self.original_pen:
+            self.setPen(self.original_pen)
 
     def show_channel_widget(self):
         # 创建并显示带宽设置对话框
@@ -122,72 +155,11 @@ class Channel(QGraphicsLineItem, QObject):
         self.widget.channel_set.connect(self.update_channel)
         
     def delete_channel(self):
-        self.start_item.interface_counter -= 1
-        self.end_item.interface_counter -= 1
-
-        print(f"start_item为{self.start_item.name},counter为{self.start_item.interface_counter}")
-        print(f"end_item为{self.end_item.name}, counter为{self.end_item.interface_counter}")
-
-        for interface_id_and_object in self.start_item.interface_id_to_object[::-1]:
-            if interface_id_and_object[1] == type(self.end_item) and interface_id_and_object[2] == self.end_item.index:
-                self.start_item.interface_id_to_object.remove(interface_id_and_object)
-
-            if interface_id_and_object[0] > self.start_interface_index:
-                interface_id_and_object[0] -= 1
-                print(f"start_item为{self.start_item.name}")
-                print(f"对面对象的type为{interface_id_and_object[1]},index为{interface_id_and_object[2]}")
-                channel = self.start_item.find_channel_by_another_object\
-                    (interface_id_and_object[1], interface_id_and_object[2])
-                if channel.start_item == self.start_item:
-                    channel.start_text.setText(str(interface_id_and_object[0]))
-                else:
-                    channel.end_text.setText(str(interface_id_and_object[0]))
-            
-            
-        
-        for interface_id_and_object in self.end_item.interface_id_to_object[::-1]:
-            if interface_id_and_object[1] == type(self.start_item) and interface_id_and_object[2] == self.start_item.index:
-                self.end_item.interface_id_to_object.remove(interface_id_and_object)
-
-            if interface_id_and_object[0] > self.end_interface_index:
-                interface_id_and_object[0] -= 1
-                print(f"end_item为{self.end_item.name}")
-                print(f"对面对象的type为{interface_id_and_object[1]},index为{interface_id_and_object[2]}")
-                channel = self.end_item.find_channel_by_another_object\
-                    (interface_id_and_object[1], interface_id_and_object[2])
-                if channel.start_item == self.end_item:
-                    channel.start_text.setText(str(interface_id_and_object[0]))
-                else:
-                    channel.end_text.setText(str(interface_id_and_object[0]))
-
-        # 删除当前通道对象（根据需求删除）
-        self.start_item.channelList.remove(self)
-        self.end_item.channelList.remove(self)
-        print(f"start为{self.start_item.name}, 列表为{self.start_item.channelList}")
-        print(f"end为{self.end_item.name},列表为{self.end_item.channelList}")
-
-        for channel in self.start_item.channelList:
-            if channel.start_item == self.start_item and channel.start_interface_index > self.start_interface_index:
-                channel.start_interface_index -= 1
-            elif channel.end_item == self.start_item and channel.end_interface_index > self.start_interface_index:
-                channel.end_interface_index -= 1
-        
-        for channel in self.end_item.channelList:
-            if channel.start_item == self.end_item and channel.start_interface_index > self.end_interface_index:
-                channel.start_interface_index -= 1
-            elif channel.end_item == self.end_item and channel.end_interface_index > self.end_interface_index:
-                channel.end_interface_index -= 1
-        
         try:
             self.delete_self.emit(self)
         except Exception as e:
             print(f"Error in delete_channel: {e}")
 
-        scene = self.scene()
-        if scene:
-            scene.removeItem(self)
-        print("删除通道")
-        del self
 
     def update_channel(self, new_bandwidth, new_banddelay):
         if new_bandwidth >= 0 and new_banddelay >= 0:
@@ -199,8 +171,8 @@ class Channel(QGraphicsLineItem, QObject):
         
         self.widget.ui.close()
         widget = self.widget
-        print(f"self.widget的地址为：{id(self.widget)}")
-        print(f"widget的地址为{id(widget)}")
+        # print(f"self.widget的地址为：{id(self.widget)}")
+        # print(f"widget的地址为{id(widget)}")
         self.widget = 0
         del widget
     
@@ -211,3 +183,9 @@ class Channel(QGraphicsLineItem, QObject):
             return self.start_item
         else:
             return None
+
+    def __str__(self):
+        return f"{self.start_item}<-d={self.banddelay},w={self.bandwidth}->{self.end_item}"
+
+    def __repr__(self):
+        return str(self)

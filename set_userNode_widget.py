@@ -15,16 +15,15 @@ class SetUserNodeWidget(QWidget):
         # 加载UI文件
         loader = QUiLoader()
         self.ui = loader.load('set_userNode.ui')  # 加载UI界面
-
+        self.ui.setWindowTitle("用户节点属性配置")
+        
         if not self.ui:
             print("UI 加载失败，请检查文件路径或格式")
 
         # 获取UI控件
         self.ip_line_edit = self.ui.findChild(QLineEdit, 'ip_lineEdit')  # 获取IP输入框
         self.mask_line_edit = self.ui.findChild(QLineEdit, 'mask_lineEdit')  # 获取子网掩码输入框
-        self.task_highest_line_edit = self.ui.findChild(QLineEdit, 'highest_limit_lineEdit')  # 获取任务上限输入框
-        self.task_lowest_line_edit = self.ui.findChild(QLineEdit, 'lowest_limit_lineEdit')  # 获取任务下限输入框
-        
+
         self.confirm_button = self.ui.findChild(QPushButton, 'confirmButton')
         self.cancel_button = self.ui.findChild(QPushButton, 'cancelButton')
         self.task_setting_button = self.ui.findChild(QPushButton, 'task_queueButton')
@@ -32,8 +31,6 @@ class SetUserNodeWidget(QWidget):
         # 设置当前的值
         self.ip_line_edit.setText(user_node.ip)
         self.mask_line_edit.setText(user_node.mask)
-        self.task_highest_line_edit.setText(str(user_node.task_highest_limit))
-        self.task_lowest_line_edit.setText(str(user_node.task_lowest_limit))
         
         # 连接信号和槽
         self.confirm_button.clicked.connect(lambda:self.accept_update(user_node))
@@ -55,11 +52,8 @@ class SetUserNodeWidget(QWidget):
         # 获取输入框的值并更新UserNode的属性
         user_node.ip = self.ip_line_edit.text()
         user_node.mask = self.mask_line_edit.text()
-        user_node.task_highest_limit = float(self.task_highest_line_edit.text())
-        user_node.task_lowest_limit = float(self.task_lowest_line_edit.text())
 
-        print(f"更新成功: IP={user_node.ip}, Mask={user_node.mask}, "
-              f"Task High Limit={user_node.task_highest_limit}, Task Low Limit={user_node.task_lowest_limit}")
+        print(f"更新成功: IP={user_node.ip}, Mask={user_node.mask}")
         
         # 发射信号，通知主界面已更新
         self.node_updated.emit()

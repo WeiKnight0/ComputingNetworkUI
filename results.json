@@ -1,73 +1,191 @@
 {
-"globalInfo": {
-"taskThroughput": {
-"value": 4.8,
-"description": "系统在单位时间内成功完成的任务数量 (总完成任务数 / 总仿真时长)"
-}
-},
-"computeNodeInfo": [
-{
-"computeNodeId": 201,
-"loadBalancingMetrics": {
-"averageUtilization": {
-"value": 75.8,
-"description": "节点利用率：仿真期间，节点处于'处理任务'状态的时间占总时间的百分比"
-},
-"totalAssignedTasks": {
-"value": 25,
-"description": "仿真结束时，分配给此节点的总任务数"
-},
-"totalProcessedLoad": {
-"value": 6540.0,
-"description": "仿真结束时，此节点处理的所有任务的计算量之和"
-}
-},
-"energyConsumption": {
-"value": 4320.7,
-"description": "算力节点总能耗 = (静态功耗 * 总运行时长) + (动态功耗 * 总繁忙时长)"
-}
-},
-{
-"computeNodeId": 202,
-"loadBalancingMetrics": {
-"averageUtilization": { "value": 62.1, "description": "..." },
-"totalAssignedTasks": { "value": 23, "description": "..." },
-"totalProcessedLoad": { "value": 6040.5, "description": "..." }
-},
-"energyConsumption": {
-"value": 4219.6,
-"description": "..."
-}
-}
-],
-"taskInfo": [
-{
-"taskId": 1,
-"userNodeId": 1,
-"status": "COMPLETED",
-"computeNodeId": 201,
-"delayDistribution": {
-"endToEndDelay": {
-"value": 3.45,
-"description": "端到端任务延迟: 任务从用户节点发出到最终用户接收到结果消息的总时延"
-},
-"computationTime": {
-"value": 3.40,
-"description": "任务计算时长: 任务到达算力节点至处理完成的时延"
-}
-},
-"cost": {
-"value": 0.017,
-"description": "任务成本: 任务计算时长 * 所在算力节点的价格"
-}
-},
-{
-"taskId": 2,
-"userNodeId": 1,
-"status": "UNCOMPLETED",
-"computeNodeId": -1,
-"delayDistribution": null,
-"cost": { "value": 0, "description": "未成功处理的任务成本为0" }
-}
-]
+  "computeNodeInfo": [
+    {
+      "computeNodeId": 1,
+      "energyConsumption": {
+        "description": "算力节点总能耗 = (静态功耗 * 总运行时长) + (动态功耗 * 总繁忙时长)",
+        "value": 3.6003503040000004e-06
+      },
+      "loadBalancingMetrics": {
+        "averageUtilization": {
+          "description": "节点利用率：仿真期间，节点处于'处理任务'状态的时间占总时间的百分比",
+          "value": 0.0
+        },
+        "totalAssignedTasks": {
+          "description": "仿真结束时，分配给此节点的总任务数",
+          "value": 1
+        },
+        "totalProcessedLoad": {
+          "description": "仿真结束时，此节点处理的所有任务的计算量之和",
+          "value": 1000000000.0
+        }
+      }
+    },
+    {
+      "computeNodeId": 2,
+      "energyConsumption": {
+        "description": "算力节点总能耗 = (静态功耗 * 总运行时长) + (动态功耗 * 总繁忙时长)",
+        "value": 1.9201868288e-06
+      },
+      "loadBalancingMetrics": {
+        "averageUtilization": {
+          "description": "节点利用率：仿真期间，节点处于'处理任务'状态的时间占总时间的百分比",
+          "value": 0.0
+        },
+        "totalAssignedTasks": {
+          "description": "仿真结束时，分配给此节点的总任务数",
+          "value": 2
+        },
+        "totalProcessedLoad": {
+          "description": "仿真结束时，此节点处理的所有任务的计算量之和",
+          "value": 1300000000.0
+        }
+      }
+    },
+    {
+      "computeNodeId": 3,
+      "energyConsumption": {
+        "description": "算力节点总能耗 = (静态功耗 * 总运行时长) + (动态功耗 * 总繁忙时长)",
+        "value": 4.800467072e-06
+      },
+      "loadBalancingMetrics": {
+        "averageUtilization": {
+          "description": "节点利用率：仿真期间，节点处于'处理任务'状态的时间占总时间的百分比",
+          "value": 36.45478603961977
+        },
+        "totalAssignedTasks": {
+          "description": "仿真结束时，分配给此节点的总任务数",
+          "value": 2
+        },
+        "totalProcessedLoad": {
+          "description": "仿真结束时，此节点处理的所有任务的计算量之和",
+          "value": 3500000000.0
+        }
+      }
+    },
+    {
+      "computeNodeId": 4,
+      "energyConsumption": {
+        "description": "算力节点总能耗 = (静态功耗 * 总运行时长) + (动态功耗 * 总繁忙时长)",
+        "value": 2.400233536e-06
+      },
+      "loadBalancingMetrics": {
+        "averageUtilization": {
+          "description": "节点利用率：仿真期间，节点处于'处理任务'状态的时间占总时间的百分比",
+          "value": 0.0
+        },
+        "totalAssignedTasks": {
+          "description": "仿真结束时，分配给此节点的总任务数",
+          "value": 2
+        },
+        "totalProcessedLoad": {
+          "description": "仿真结束时，此节点处理的所有任务的计算量之和",
+          "value": 1800000000.0
+        }
+      }
+    }
+  ],
+  "globalInfo": {
+    "taskThroughput": {
+      "description": "系统在单位时间内成功完成的任务数量 (总完成任务数 / 总仿真时长)",
+      "value": 0.1666503382665233
+    }
+  },
+  "taskInfo": [
+    {
+      "computeNodeId": 2,
+      "cost": {
+        "description": "未成功处理的任务成本为 0",
+        "value": 0
+      },
+      "delayDistribution": null,
+      "status": 0,
+      "taskId": 1,
+      "userNodeId": 1
+    },
+    {
+      "computeNodeId": 4,
+      "cost": {
+        "description": "未成功处理的任务成本为 0",
+        "value": 0
+      },
+      "delayDistribution": null,
+      "status": 0,
+      "taskId": 1,
+      "userNodeId": 2
+    },
+    {
+      "computeNodeId": 3,
+      "cost": {
+        "description": "任务成本: 任务计算时长 * 所在算力节点的价格",
+        "value": 0.009375
+      },
+      "delayDistribution": {
+        "computationTime": {
+          "description": "任务计算时长: 任务到达算力节点至处理完成的时延",
+          "value": 1.875
+        },
+        "endToEndDelay": {
+          "description": "端到端任务延迟: 任务从用户节点发出到最终用户接收到结果消息的总时延",
+          "value": 1.87521728
+        }
+      },
+      "status": 1,
+      "taskId": 2,
+      "userNodeId": 1
+    },
+    {
+      "computeNodeId": 3,
+      "cost": {
+        "description": "任务成本: 任务计算时长 * 所在算力节点的价格",
+        "value": 0.0125
+      },
+      "delayDistribution": {
+        "computationTime": {
+          "description": "任务计算时长: 任务到达算力节点至处理完成的时延",
+          "value": 2.5
+        },
+        "endToEndDelay": {
+          "description": "端到端任务延迟: 任务从用户节点发出到最终用户接收到结果消息的总时延",
+          "value": 2.5002488
+        }
+      },
+      "status": 1,
+      "taskId": 2,
+      "userNodeId": 2
+    },
+    {
+      "computeNodeId": 2,
+      "cost": {
+        "description": "未成功处理的任务成本为 0",
+        "value": 0
+      },
+      "delayDistribution": null,
+      "status": 0,
+      "taskId": 3,
+      "userNodeId": 1
+    },
+    {
+      "computeNodeId": 4,
+      "cost": {
+        "description": "未成功处理的任务成本为 0",
+        "value": 0
+      },
+      "delayDistribution": null,
+      "status": 0,
+      "taskId": 3,
+      "userNodeId": 2
+    },
+    {
+      "computeNodeId": 1,
+      "cost": {
+        "description": "未成功处理的任务成本为 0",
+        "value": 0
+      },
+      "delayDistribution": null,
+      "status": 0,
+      "taskId": 4,
+      "userNodeId": 1
+    }
+  ]
 }

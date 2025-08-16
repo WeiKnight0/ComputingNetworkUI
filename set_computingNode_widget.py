@@ -13,6 +13,7 @@ class SetComputingNodeWidget(QWidget):
         # 加载UI文件
         loader = QUiLoader()
         self.ui = loader.load('set_computingNode.ui')
+        self.ui.setWindowTitle(f"{computing_node.name}属性配置")
         
         # 检查UI加载状态
         if not self.ui:
@@ -27,7 +28,8 @@ class SetComputingNodeWidget(QWidget):
         self.storage_space_line_edit = self.find_widget(QLineEdit, 'storageSpaceLineEdit')  
         self.switching_capacitance_line_edit = self.find_widget(QLineEdit, 'switchingCapacitanceLineEdit')  
         self.static_power_line_edit = self.find_widget(QLineEdit, 'staticPowerLineEdit')  
-        self.price_line_edit = self.find_widget(QLineEdit, 'priceLineEdit') 
+        self.price_line_edit = self.find_widget(QLineEdit, 'priceLineEdit')
+        self.powermix_line_edit = self.find_widget(QLineEdit, 'powermixLineEdit')
         
         self.confirm_button = self.find_widget(QPushButton, 'confirmButton')
         self.cancel_button = self.find_widget(QPushButton, 'cancelButton')
@@ -39,10 +41,15 @@ class SetComputingNodeWidget(QWidget):
         self.set_placeholder_text(self.static_power_line_edit, "nW")
         self.set_placeholder_text(self.price_line_edit, "元/s")
 
-        # 设置下拉框选项
+        # 先阻止信号（如果使用 PyQt/PySide）
         if self.computing_type_comboBox:
+            self.computing_type_comboBox.blockSignals(True)  # 阻止信号
+            self.computing_type_comboBox.clear()  # 清空现有项
             self.computing_type_comboBox.addItem("CPU", 0)
             self.computing_type_comboBox.addItem("GPU", 1)
+            # 主动设置默认选中项（例如选中CPU）
+            self.computing_type_comboBox.setCurrentIndex(0)
+            self.computing_type_comboBox.blockSignals(False)  # 恢复信号
 
         # 初始化UI值
         self.initialize_ui_values()
@@ -56,7 +63,7 @@ class SetComputingNodeWidget(QWidget):
     def find_widget(self, widget_type, object_name):
         widget = self.ui.findChild(widget_type, object_name)
         if not widget:
-            print(f"警告: 未找到UI控件 {object_name}")
+            QMessageBox.warning(self,"警告",f"未找到UI控件 {object_name}")
         return widget
 
     def set_placeholder_text(self, widget, unit):
@@ -82,7 +89,8 @@ class SetComputingNodeWidget(QWidget):
             self.storage_space_line_edit: self.computing_node.storage_space,
             self.switching_capacitance_line_edit: self.computing_node.switching_capacitance,
             self.static_power_line_edit: self.computing_node.static_power,
-            self.price_line_edit: self.computing_node.price
+            self.price_line_edit: self.computing_node.price,
+            self.powermix_line_edit: self.computing_node.power_mix
         }
         
         for widget, value in value_widgets.items():
@@ -125,7 +133,8 @@ class SetComputingNodeWidget(QWidget):
             "存储空间": (self.storage_space_line_edit, "storage_space"),
             "开关电容": (self.switching_capacitance_line_edit, "switching_capacitance"),
             "静态功耗": (self.static_power_line_edit, "static_power"),
-            "价格": (self.price_line_edit, "price")
+            "价格": (self.price_line_edit, "price"),
+            "混合能源参数":(self.powermix_line_edit, "power_mix")
         }
 
         for field_name, (widget, attr_name) in field_mapping.items():

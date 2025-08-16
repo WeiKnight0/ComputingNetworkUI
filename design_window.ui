@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>606</height>
+    <width>787</width>
+    <height>642</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,8 +15,27 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+    <item row="0" column="1">
+     <widget class="QPushButton" name="accelerateButton">
+      <property name="maximumSize">
+       <size>
+        <width>30</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" rowspan="6" colspan="24">
      <widget class="QGraphicsView" name="graphicsView">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="autoFillBackground">
        <bool>true</bool>
       </property>
@@ -43,7 +62,42 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
+    <item row="0" column="3">
+     <widget class="QPushButton" name="pauseButton">
+      <property name="maximumSize">
+       <size>
+        <width>30</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="runButton">
+      <property name="minimumSize">
+       <size>
+        <width>10</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>30</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">d315510ffdf0babe22dffdf44fb42d58.png</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="24">
      <widget class="QListWidget" name="listWidget">
       <property name="minimumSize">
        <size>
@@ -61,6 +115,11 @@
        <property name="text">
         <string>用户节点</string>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>15</pointsize>
+        </font>
+       </property>
        <property name="icon">
         <iconset>
          <normaloff>icon/用户节点.png</normaloff>icon/用户节点.png</iconset>
@@ -69,6 +128,11 @@
       <item>
        <property name="text">
         <string>算力节点</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>15</pointsize>
+        </font>
        </property>
        <property name="icon">
         <iconset>
@@ -79,6 +143,11 @@
        <property name="text">
         <string>用户网关</string>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>15</pointsize>
+        </font>
+       </property>
        <property name="icon">
         <iconset>
          <normaloff>icon/用户网关.png</normaloff>icon/用户网关.png</iconset>
@@ -88,6 +157,11 @@
        <property name="text">
         <string>算力网关</string>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>15</pointsize>
+        </font>
+       </property>
        <property name="icon">
         <iconset>
          <normaloff>icon/算力网关.png</normaloff>icon/算力网关.png</iconset>
@@ -95,28 +169,83 @@
       </item>
       <item>
        <property name="text">
-        <string>调度决策网关</string>
+        <string>算力调度节点</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>15</pointsize>
+        </font>
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>icon/调度决策网关.png</normaloff>icon/调度决策网关.png</iconset>
+         <normaloff>icon/算力调度节点.png</normaloff>icon/算力调度节点.png</iconset>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>路由器</string>
+        <string>路由节点</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>15</pointsize>
+        </font>
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>icon/路由器.png</normaloff>icon/路由器.png</iconset>
+         <normaloff>icon/路由节点.png</normaloff>icon/路由节点.png</iconset>
        </property>
       </item>
      </widget>
     </item>
-    <item row="1" column="0" colspan="2">
-     <widget class="QLabel" name="statusLabel">
+    <item row="0" column="2">
+     <widget class="QPushButton" name="decelerateButton">
+      <property name="maximumSize">
+       <size>
+        <width>30</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="text">
-       <string>TextLabel</string>
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="QPushButton" name="stopButton">
+      <property name="maximumSize">
+       <size>
+        <width>30</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="5">
+     <widget class="QPushButton" name="resetButton">
+      <property name="maximumSize">
+       <size>
+        <width>30</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="6">
+     <widget class="QPushButton" name="showMonitorButton">
+      <property name="maximumSize">
+       <size>
+        <width>30</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </item>
@@ -127,68 +256,117 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>787</width>
      <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>开始</string>
+     <string>算网环境</string>
     </property>
-    <addaction name="actionsubmit"/>
+    <addaction name="actionconfig"/>
     <addaction name="actionclear"/>
     <addaction name="actionsave"/>
     <addaction name="actionload"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
-     <string>网络仿真</string>
+     <string>仿真结果</string>
     </property>
-    <addaction name="actionconfig"/>
-    <addaction name="actionrun"/>
     <addaction name="actionexport"/>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>网络仿真</string>
+    </property>
+    <addaction name="actionrun"/>
+    <addaction name="accelerateAction"/>
+    <addaction name="decelerateAction"/>
+    <addaction name="pauseAction"/>
+    <addaction name="stopAction"/>
+    <addaction name="resetAction"/>
+    <addaction name="showMonitorAction"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_3"/>
    <addaction name="menu_2"/>
   </widget>
-  <action name="actionsubmit">
-   <property name="text">
-    <string>提交</string>
-   </property>
-  </action>
+  <widget class="QDockWidget" name="monitorDockWidget">
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QStackedWidget" name="stackedWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="page"/>
+       <widget class="QWidget" name="page_2"/>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionclear">
    <property name="text">
-    <string>清除</string>
+    <string>新建算网环境</string>
    </property>
   </action>
   <action name="actionsave">
    <property name="text">
-    <string>保存网络</string>
+    <string>保存算网环境</string>
    </property>
   </action>
   <action name="actionload">
    <property name="text">
-    <string>加载网络</string>
-   </property>
-  </action>
-  <action name="action">
-   <property name="text">
-    <string>运行</string>
+    <string>加载算网环境</string>
    </property>
   </action>
   <action name="actionrun">
    <property name="text">
-    <string>运行</string>
+    <string>仿真启动</string>
    </property>
   </action>
   <action name="actionexport">
    <property name="text">
-    <string>导出结果</string>
+    <string>查看与导出</string>
    </property>
   </action>
   <action name="actionconfig">
    <property name="text">
     <string>配置OMNet++</string>
+   </property>
+  </action>
+  <action name="accelerateAction">
+   <property name="text">
+    <string>仿真加速</string>
+   </property>
+  </action>
+  <action name="decelerateAction">
+   <property name="text">
+    <string>仿真减速</string>
+   </property>
+  </action>
+  <action name="pauseAction">
+   <property name="text">
+    <string>仿真暂停</string>
+   </property>
+  </action>
+  <action name="resetAction">
+   <property name="text">
+    <string>仿真重置</string>
+   </property>
+  </action>
+  <action name="showMonitorAction">
+   <property name="text">
+    <string>仿真监控</string>
+   </property>
+  </action>
+  <action name="stopAction">
+   <property name="text">
+    <string>仿真停止</string>
    </property>
   </action>
  </widget>

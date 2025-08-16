@@ -12,7 +12,7 @@ class SetNodeConfigWidget(QWidget):
         self.node = node
         self.node_type = node.__class__.__name__
         
-        self.setWindowTitle(f"{self.node_type} 配置")
+        self.setWindowTitle(f"算力调度节点属性配置")
         self.resize(600, 400)
         
         # 创建主布局
@@ -39,7 +39,7 @@ class SetNodeConfigWidget(QWidget):
         if self.node_type in ["UserGateway", "ComputingGateway", "Router"]:
             # 这些节点类型需要根据接口数量动态生成IP配置
             self.create_interface_ip_layout(config_layout)
-        elif self.node_type == "DecisionRouter":
+        elif self.node_type == "ComputeScheduleNode":
             # 决策路由器使用固定IP配置
             self.create_fixed_ip_layout(config_layout)
         else:
@@ -151,11 +151,11 @@ class SetNodeConfigWidget(QWidget):
             self.node.ip_list = [edit.text() for edit in self.ip_edits]
             self.node.mask_list = [edit.text() for edit in self.mask_edits]
             print(f"保存 {self.node_type} 接口配置: {self.node.ip_list}, {self.node.mask_list}")
-        elif self.node_type == "DecisionRouter":
+        elif self.node_type == "ComputeScheduleNode":
             # 保存固定IP配置
             self.node.ip = self.ip_edit.text()
             self.node.mask = self.mask_edit.text()
-            print(f"保存 DecisionRouter 配置: {self.node.ip}, {self.node.mask}")
+            print(f"保存 ComputeScheduleNode 配置: {self.node.ip}, {self.node.mask}")
         else:
             print(f"警告: 未定义的节点类型 {self.node_type}，无法保存配置")
         
